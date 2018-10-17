@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(debug_print)
+project(ctest)
 
 set(DOUBLY_LINKED_LIST_HEADER_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/inc/debug_print.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/ctest.h
     )
 
 set(DOUBLY_LINKED_LIST_SOURCE_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/src/debug_print.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/ctest.c
     )
 
 add_library(${PROJECT_NAME}_lib
