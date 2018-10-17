@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
 project(doubly_linked_list)
-add_compile_options("-Wall" "-Wextra" "-pedantic" "-Wcast-align"
+add_compile_options("-Wall" "-g3" "-Wextra" "-pedantic" "-Wcast-align"
 "-Winit-self" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow"
 "-Wstrict-overflow=5" "-Wundef" "-Wwrite-strings" "-Wpointer-arith"
 "-Wmissing-declarations" "-Wuninitialized" "-Wold-style-definition"
@@ -25,4 +25,4 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC inc)
 add_executable(${PROJECT_NAME} src/main.c)
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 
-#add_subdirectory(tests)
+add_subdirectory(tests)

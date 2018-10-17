@@ -2,41 +2,40 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-#define free_ptr(ptr) \
+#define FREE(ptr) \
     do { \
-      void** _ptr = (ptr); \
-      free(*(_ptr)); \
-      *(_ptr) = NULL; \
+      free(ptr); \
+      ptr = NULL; \
     } while (0)
 
-inline static node_doubly_linked_list_t*
-create_node(const doubly_linked_list_t *dll_p, void *data_p)
+static nodeDoublyLinkedList_t*
+createNode(const doublyLinkedList_t* dll_p, void* data_p)
 {
     assert(dll_p && data_p);
-    node_doubly_linked_list_t *newNode_p = (node_doubly_linked_list_t*)malloc(sizeof(*newNode_p));
-    newNode_p->__data_p__ = malloc(sizeof(dll_p->__elementSize__));
+    nodeDoublyLinkedList_t *newNode_p = (nodeDoublyLinkedList_t*)malloc(sizeof(*newNode_p));
+    newNode_p->__data_p__ = (void*)malloc(dll_p->__elementSize__);
     newNode_p->__next_p__ = newNode_p->__prev_p__ = NULL;
     memcpy(newNode_p->__data_p__, data_p, dll_p->__elementSize__);
     return newNode_p;
 }
 
-inline static void
-free_node(node_doubly_linked_list_t* node_p)
+__attribute__((always_inline)) inline static void
+freeNode(nodeDoublyLinkedList_t* node_p)
 {
     assert(node_p);
-    free_ptr((void**)&node_p->__data_p__);
-    free_ptr((void**)&node_p);
+    FREE(node_p->__data_p__);
+    FREE(node_p);
 }
 
-doubly_linked_list_t*
-init(size_t element_size, int8_t (*compare)(const void*, const void*))
+doublyLinkedList_t*
+init(size_t element_size, int (*compare)(const void*, const void*))
 {
-    assert(element_size > 0);
-    assert(compare);
+    assert((element_size > 0) && compare);
 
-    doubly_linked_list_t* newDoublyLinkedList_p =
-            (doubly_linked_list_t*)malloc(sizeof(doubly_linked_list_t));
+    doublyLinkedList_t* newDoublyLinkedList_p =
+            (doublyLinkedList_t*)malloc(sizeof(*newDoublyLinkedList_p));
     newDoublyLinkedList_p->__size__ = 0;
     newDoublyLinkedList_p->__elementSize__ = element_size;
     newDoublyLinkedList_p->__compare__ = compare;
@@ -45,151 +44,148 @@ init(size_t element_size, int8_t (*compare)(const void*, const void*))
 }
 
 void
-clear(doubly_linked_list_t *dll_p)
+clear(doublyLinkedList_t* dll_p)
 {
     assert(dll_p);
 
-    node_doubly_linked_list_t *head_p = dll_p->__head_p__;
-    node_doubly_linked_list_t *tmpHead_p = head_p;
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
+    nodeDoublyLinkedList_t* nextNode_p = NULL;
 
-    while (head_p != NULL)
+    while (currentNode_p != NULL)
     {
-        tmpHead_p = head_p->__next_p__;
-        free_node(head_p);
-        head_p = tmpHead_p;
+        nextNode_p = currentNode_p->__next_p__;
+        freeNode(currentNode_p);
+        currentNode_p = nextNode_p;
     }
 
-    free_ptr((void**)&dll_p);
+    FREE(dll_p);
 }
 
 void
-insert(doubly_linked_list_t* dll_p, void* data_p)
+insert(doublyLinkedList_t* dll_p, void* data_p)
 {
     assert(dll_p && data_p);
-    node_doubly_linked_list_t* newNode_p = create_node(dll_p, data_p);
 
+    nodeDoublyLinkedList_t* newNode_p = createNode(dll_p, data_p);
     dll_p->__size__++;
 
     if (dll_p->__head_p__ == NULL)
     {
         dll_p->__head_p__ = dll_p->__tail_p__ = newNode_p;
+        return;
     }
-    else
+
+    if (dll_p->__compare__(newNode_p->__data_p__, dll_p->__tail_p__->__data_p__) >= 0)
     {
-        if (dll_p->__compare__(dll_p->__head_p__->__data_p__, newNode_p->__data_p__) == 1 ||
-            dll_p->__compare__(dll_p->__head_p__->__data_p__, newNode_p->__data_p__) == 0)
-        {
-            node_doubly_linked_list_t* currentNode_p = dll_p->__head_p__;
-            currentNode_p->__prev_p__ = newNode_p;
-            newNode_p->__next_p__ = currentNode_p;
-            dll_p->__head_p__ = newNode_p;
-            return;
-        }
-
-        if (dll_p->__compare__(newNode_p->__data_p__, dll_p->__tail_p__->__data_p__) == 1 ||
-            dll_p->__compare__(newNode_p->__data_p__, dll_p->__tail_p__->__data_p__) == 0)
-        {
-            node_doubly_linked_list_t* currentNode_p = dll_p->__tail_p__;
-            currentNode_p->__next_p__ = newNode_p;
-            newNode_p->__prev_p__ = currentNode_p;
-            dll_p->__tail_p__ = newNode_p;
-            return;
-        }
-
-        node_doubly_linked_list_t* currentNode_p = dll_p->__head_p__;
-
-        while (currentNode_p->__next_p__ != NULL)
-        {
-            if (dll_p->__compare__(currentNode_p->__data_p__, newNode_p->__data_p__) == -1 &&
-               (dll_p->__compare__(currentNode_p->__next_p__->__data_p__, newNode_p->__data_p__) == 1 ||
-                dll_p->__compare__(currentNode_p->__next_p__->__data_p__, newNode_p->__data_p__) == 0))
-            {
-                break;
-            }
-            currentNode_p = currentNode_p->__next_p__;
-        }
-
-        newNode_p->__next_p__ = currentNode_p->__next_p__;
-        newNode_p->__prev_p__ = currentNode_p->__next_p__->__prev_p__;
-        currentNode_p->__next_p__->__prev_p__ = newNode_p;
+        nodeDoublyLinkedList_t* currentNode_p = dll_p->__tail_p__;
         currentNode_p->__next_p__ = newNode_p;
+        newNode_p->__prev_p__ = currentNode_p;
+        dll_p->__tail_p__ = newNode_p;
+        return;
+    }
+
+    if (dll_p->__compare__(newNode_p->__data_p__, dll_p->__head_p__->__data_p__) <= 0)
+    {
+        nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
+        currentNode_p->__prev_p__ = newNode_p;
+        newNode_p->__next_p__ = currentNode_p;
+        dll_p->__head_p__ = newNode_p;
+        return;
+    }
+    
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__->__next_p__;
+
+    while (currentNode_p != NULL)
+    {
+        if (dll_p->__compare__(newNode_p->__data_p__, currentNode_p->__data_p__) <= 0)
+        {
+            newNode_p->__next_p__ = currentNode_p;
+            newNode_p->__prev_p__ = currentNode_p->__prev_p__;
+            currentNode_p->__prev_p__->__next_p__ = newNode_p;
+            currentNode_p->__prev_p__ = newNode_p;
+            return;
+        }
+        currentNode_p = currentNode_p->__next_p__;
     }
 }
 
 void
-erase(doubly_linked_list_t *dll_p, void *outputData_p, size_t index)
+erase(doublyLinkedList_t* dll_p, void* outputData_p, size_t index)
 {
-    assert(dll_p);
-    assert(dll_p->__size__ > index);
+    assert(dll_p && (size(dll_p) > index));
 
-    node_doubly_linked_list_t *node_to_delete = dll_p->__head_p__;
-    for (size_t i = 0; i < index; ++i)
+    nodeDoublyLinkedList_t* nodeToDelete = dll_p->__head_p__;
+    for (size_t i = 0; i < index; i++)
     {
-        node_to_delete = node_to_delete->__next_p__;
+        nodeToDelete = nodeToDelete->__next_p__;
     }
 
     dll_p->__size__--;
 
     if (outputData_p)
-        memcpy(outputData_p, node_to_delete->__data_p__, dll_p->__elementSize__);
-
-    if (node_to_delete == dll_p->__head_p__ &&
-        node_to_delete == dll_p->__tail_p__)
     {
-        free_node(dll_p->__head_p__);
+        memcpy(outputData_p, nodeToDelete->__data_p__, dll_p->__elementSize__);
+    }
+
+    if (nodeToDelete == dll_p->__head_p__ &&
+        nodeToDelete == dll_p->__tail_p__)
+    {
+        freeNode(dll_p->__head_p__);
         dll_p->__head_p__ = dll_p->__tail_p__ = NULL;
         return;
     }
 
-    if (node_to_delete == dll_p->__head_p__)
+    if (nodeToDelete == dll_p->__head_p__)
     {
         dll_p->__head_p__ = dll_p->__head_p__->__next_p__;
         dll_p->__head_p__->__prev_p__ = NULL;
-        free_node(node_to_delete);
+        freeNode(nodeToDelete);
         return;
     }
 
-    if (node_to_delete == dll_p->__tail_p__)
+    if (nodeToDelete == dll_p->__tail_p__)
     {
         dll_p->__tail_p__ = dll_p->__tail_p__->__prev_p__;
         dll_p->__tail_p__->__next_p__ = NULL;
-        free_node(node_to_delete);
+        freeNode(nodeToDelete);
         return;
     }
 
-    node_to_delete->__next_p__->__prev_p__ = node_to_delete->__prev_p__;
-    node_to_delete->__prev_p__->__next_p__ = node_to_delete->__next_p__;
-    free_node(node_to_delete);
+    nodeToDelete->__next_p__->__prev_p__ = nodeToDelete->__prev_p__;
+    nodeToDelete->__prev_p__->__next_p__ = nodeToDelete->__next_p__;
+    freeNode(nodeToDelete);
 }
 
 void
-get(const doubly_linked_list_t *dll_p, void *output_data_p, size_t index)
+get(const doublyLinkedList_t* dll_p, void* outputData_p, size_t index)
 {
-    assert(dll_p && output_data_p);
-    assert(size(dll_p) > index);
+    assert(dll_p && outputData_p && (size(dll_p) > index));
 
-    node_doubly_linked_list_t* currentNode_p = dll_p->__head_p__;
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
     for (size_t i = 0; i < index; ++i)
     {
         currentNode_p = currentNode_p->__next_p__;
     }
 
     if (currentNode_p->__data_p__)
-        memcpy(output_data_p, currentNode_p->__data_p__, dll_p->__elementSize__);
+    {
+        memcpy(outputData_p, currentNode_p->__data_p__, dll_p->__elementSize__);
+    }
 }
 
 int
-search(const doubly_linked_list_t *dll_p, void* searchData_p)
+search(const doublyLinkedList_t* dll_p, void* searchData_p)
 {
     assert(dll_p && searchData_p);
 
-    node_doubly_linked_list_t* currentNode_p = dll_p->__head_p__;
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
 
     while (currentNode_p != NULL)
     {
         if (dll_p->__compare__(currentNode_p->__data_p__, searchData_p) == 0)
+        {
             return 0;
-
+        }
         currentNode_p = currentNode_p->__next_p__;
     }
 
@@ -197,7 +193,7 @@ search(const doubly_linked_list_t *dll_p, void* searchData_p)
 }
 
 size_t
-size(const doubly_linked_list_t *dll_p)
+size(const doublyLinkedList_t *dll_p)
 {
     assert(dll_p);
     return dll_p->__size__;

@@ -1,157 +1,285 @@
 #include <doubly_linked_list.h>
-#include <ctest.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdint.h>
 
-static int compare_ints(const void *a, const void *b)
+#define SIZE_OF_ARRAY(array) sizeof(array) / sizeof(array[0])
+
+static int
+compareInt32(const void* a, const void* b)
 {
     assert(a && b);
-    const int* ia = (const int*)a;
-    const int* ib = (const int*)b;
+    const int32_t* ia = (const int32_t*)a;
+    const int32_t* ib = (const int32_t*)b;
     if (*ia > *ib) return 1;
     if (*ia == *ib) return 0;
     return -1;
 }
 
-static void test_init_and_clear_function(void)
+static int
+compareUint32(const void* a, const void* b)
 {
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
-    assert(dll->__head__ == NULL && dll->__tail__ == NULL);
-    assert(dll->__compare__ == compare_ints);
+    assert(a && b);
+    const uint32_t* ia = (const uint32_t*)a;
+    const uint32_t* ib = (const uint32_t*)b;
+    if (*ia > *ib) return 1;
+    if (*ia == *ib) return 0;
+    return -1;
+}
+
+static int
+compareDouble(const void* a, const void* b)
+{
+    assert(a && b);
+    const double* ia = (const double*)a;
+    const double* ib = (const double*)b;
+    if (*ia > *ib) return 1;
+    if (*ia == *ib) return 0;
+    return -1;
+}
+
+static void
+printInt32(const doublyLinkedList_t* dll_p)
+{
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
+
+    while (currentNode_p != NULL)
+    {
+        printf("%d, ", *(int32_t*)currentNode_p->__data_p__);
+        currentNode_p = currentNode_p->__next_p__;
+    }
+}
+
+static void
+printUint32(const doublyLinkedList_t* dll_p)
+{
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
+
+    while (currentNode_p != NULL)
+    {
+        printf("%u, ", *(uint32_t*)currentNode_p->__data_p__);
+        currentNode_p = currentNode_p->__next_p__;
+    }
+}
+
+
+static void
+printDouble(const doublyLinkedList_t* dll_p)
+{
+    nodeDoublyLinkedList_t* currentNode_p = dll_p->__head_p__;
+
+    while (currentNode_p != NULL)
+    {
+        printf("%lf, ", *(double*)currentNode_p->__data_p__);
+        currentNode_p = currentNode_p->__next_p__;
+    }
+}
+
+/* ************************************************** */
+/*                  TEST FUNCTIONS                    */
+/* ************************************************** */
+
+static void
+testInitAndClearFuntions(void)
+{
+    doublyLinkedList_t* dll_p = init(sizeof(int32_t), compareInt32);
+    assert(dll_p);
+    assert(dll_p->__head_p__ == NULL && dll_p->__tail_p__ == NULL);
+    assert(dll_p->__compare__ == compareInt32);
 
     size_t size = 0;
 
-    EQUALS_SIZE_T(dll->__element_size__, sizeof(int));
-    EQUALS_SIZE_T(dll->__size__, size);
-    clear(dll);
+    assert(dll_p->__elementSize__ == sizeof(int));
+    assert(dll_p->__size__ == size);
+    clear(dll_p);
 }
 
-static void test_insert_function(void)
+static void
+testInsertFunction(void)
 {
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
+    /* ************************************************** */
+    /* test insert after tail */
+    doublyLinkedList_t* dll_p = init(sizeof(int32_t), compareInt32);
 
-    int example_value[] = { 11, 22, 33, 44, 55,
-                            66, 77, 88, 99, 101 };
+    int32_t arrayOfInts[] = { 1, 2, 3, 4, 5 };
 
-    for (size_t i = 0; i < 10; ++i)
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfInts); i++)
     {
-        insert(dll, &example_value[i]);
-        EQUALS_SIZE_T(dll->__size__, i + 1);
+        insert(dll_p, &arrayOfInts[i]);
     }
 
-    clear(dll);
+    printInt32(dll_p);
+    clear(dll_p);
+    printf("\n");
+
+    /* ************************************************** */
+    /* test insert before head */
+
+    dll_p = init(sizeof(int32_t), compareInt32);
+
+    arrayOfInts[0] = 5;
+    arrayOfInts[1] = 4;
+    arrayOfInts[2] = 3;
+    arrayOfInts[3] = 2;
+    arrayOfInts[4] = 1;
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfInts); i++)
+    {
+        insert(dll_p, &arrayOfInts[i]);
+    }
+
+    printInt32(dll_p);
+    clear(dll_p);
+    printf("\n");
+
+    /* ************************************************** */
+    /* test insert in the middle of list */
+
+    dll_p = init(sizeof(int32_t), compareInt32);
+
+    arrayOfInts[0] = 1;
+    arrayOfInts[1] = 5;
+    arrayOfInts[2] = 2;
+    arrayOfInts[3] = 3;
+    arrayOfInts[4] = 4;
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfInts); i++)
+    {
+        insert(dll_p, &arrayOfInts[i]);
+    }
+
+    printInt32(dll_p);
+    clear(dll_p);
+    printf("\n");
+
+    /* ************************************************** */
+    /* test for many values */
+
+    dll_p = init(sizeof(double), compareDouble);
+
+    double arrayOfDoubles[] = { 3.14, 6.28, 8.56,
+                                2.77, 2.09, 1.95,
+                                5.78, 5.38, 5.89,
+                                9.78, 9.98, 9.99,
+                                0.45, 0.23, 0.11,
+                                7.34, 5.85, 6.76 };
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfDoubles); i++)
+    {
+        insert(dll_p, &arrayOfDoubles[i]);
+    }
+
+    printDouble(dll_p);
+    clear(dll_p);
+
+    /* ************************************************** */
 }
 
-static void test_get_function(void)
+static void
+testEraseFunction(void)
 {
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
+    doublyLinkedList_t* dll_p = init(sizeof(uint32_t), compareUint32);
 
-    int first_value = 127;
-    int second_value = 13;
-    int third_value = 399;
+    uint32_t arrayOfUints[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 27, 31 };
 
-    int get_value = 0;
-
-    insert(dll, &first_value);
-    insert(dll, &second_value);
-    insert(dll, &third_value);
-
-    get(dll, &get_value, 2);
-    EQUALS_INT(get_value, third_value);
-    get(dll, &get_value, 1);
-    EQUALS_INT(get_value, first_value);
-    get(dll, &get_value, 0);
-    EQUALS_INT(get_value, second_value);
-
-    clear(dll);
-}
-
-static void test_erase_function(void)
-{
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
-
-    int example_value[] = { 1, 2, 3, 4, 5 };
-
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfUints); i++)
     {
-        insert(dll, &example_value[i]);
+        insert(dll_p, &arrayOfUints[i]);
     }
 
-    size_t size_of_list = 0;
+    printUint32(dll_p);
+    printf("\n");
 
-    erase(dll, NULL, 4);
-    size_of_list = 4;
-    EQUALS_SIZE_T(size(dll), size_of_list);
+    size_t sizeOfDll = size(dll_p);
+    uint32_t outputData = 0;
 
-    erase(dll, NULL, 0);
-    size_of_list = 3;
-    EQUALS_SIZE_T(size(dll), size_of_list);
+    /* ************************************************** */
+    /* erase value from tail */
+    /* { 2, 3, 5, 7, 11, 13, 17, 19, 23, 27, ->31<- } */
 
-    erase(dll, NULL, 1);
-    size_of_list = 2;
-    EQUALS_SIZE_T(size(dll), size_of_list);
+    erase(dll_p, &outputData, 10);
+    assert(outputData == arrayOfUints[10]);
+    assert(--sizeOfDll == size(dll_p));
 
-    erase(dll, NULL, 1);
-    size_of_list = 1;
-    EQUALS_SIZE_T(size(dll), size_of_list);
+    printUint32(dll_p);
+    printf("\n");
 
-    erase(dll, NULL, 0);
-    size_of_list = 0;
-    EQUALS_SIZE_T(size(dll), size_of_list);
+    /* ************************************************** */
+    /* erase value from head */
+    /* { ->2<-, 3, 5, 7, 11, 13, 17, 19, 23, 27, !31 } */
 
-    clear(dll);
-}
+    erase(dll_p, &outputData, 0);
+    assert(outputData == arrayOfUints[0]);
+    assert(--sizeOfDll == size(dll_p));
 
-static void test_search_function(void)
-{
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
+    printUint32(dll_p);
+    printf("\n");
 
-    int example_value[] = { 11, 17, 29, 37, 101 };
+    /* ************************************************** */
+    /* erase value from middle of list */
+    /* { !2, 3, 5, 7, 11, 13, 17, ->19<-, 23, 27, !31 } */
 
-    for (size_t i = 0; i < 5; ++i)
+    erase(dll_p, &outputData, 5);
+    assert(outputData == arrayOfUints[6]);
+    assert(--sizeOfDll == size(dll_p));
+
+    printUint32(dll_p);
+    printf("\n");
+
+    /* ************************************************** */
+    /* erase value from middle of list */
+    /* { !2, 3, 5, ->7<-, 11, 13, !17, 19, 23, 27, !31 } */
+
+    erase(dll_p, &outputData, 2);
+    assert(outputData == arrayOfUints[3]);
+    assert(--sizeOfDll == size(dll_p));
+
+    printUint32(dll_p);
+    printf("\n");
+
+    clear(dll_p);
+
+    /* ************************************************** */
+
+    dll_p = init(sizeof(double), compareDouble);
+
+    double array[] = { 3.14, 6.28, 8.56,
+                       2.77, 2.09, 1.95,
+                       5.78, 5.38, 5.89,
+                       9.78, 9.98, 9.99,
+                       0.45, 0.23, 0.11,
+                       7.34, 5.85, 6.76 };
+
+    double expectedArray[] = { 0.11, 0.23, 0.45,
+                               1.95, 2.09, 2.77,
+                               3.14, 5.38, 5.78,
+                               5.85, 5.89, 6.28,
+                               6.76, 7.34, 8.56,
+                               9.78, 9.98, 9.99 };
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(array); i++)
     {
-        insert(dll, &example_value[i]);
+        insert(dll_p, &array[i]);
     }
 
-    for (size_t i = 0; i < 5; ++i)
+    sizeOfDll = size(dll_p);
+    double outputData2 = 0;
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(array); i++)
     {
-        EQUALS_INT(search(dll, &example_value[i]), 0);
+        erase(dll_p, &outputData2, 0);
+        assert(outputData2 == expectedArray[i]);
+        assert(--sizeOfDll == size(dll_p));
     }
 
-    clear(dll);
-}
-
-static void test_size_function(void)
-{
-    doubly_linked_list_t *dll = init(sizeof(int), compare_ints);
-    assert(dll);
-
-    EQUALS_SIZE_T(size(dll), dll->__size__);
-
-    int example_value = 0;
-
-    for (size_t i = 0; i < 5; ++i)
-    {
-        insert(dll, &example_value);
-        EQUALS_SIZE_T(size(dll), i + 1);
-    }
-
-    clear(dll);
+    clear(dll_p);
 }
 
 int main(void)
 {
-    BEGIN();
-    TEST(test_init_and_clear_function());
-    TEST(test_insert_function());
-    TEST(test_get_function());
-    TEST(test_erase_function());
-    TEST(test_search_function());
-    TEST(test_size_function());
-    SUMMARY();
+    testInitAndClearFuntions();
+    testInsertFunction();
+    testEraseFunction();
+
     return 0;
 }
