@@ -20,6 +20,6 @@ static int myPrint(const char* fmt, ...)
 
 #define _PRINT(fmt, ...) myPrint("%s:%d:" fmt, __FILE__, __LINE__, __VA_ARGS__)
 
-#define PRINT(...) _PRINT(GET_HEAD(__VA_ARGS__)"%0d", GET_TAIL(__VA_ARGS__, 0))
+#define PRINT(...) _PRINT(GET_HEAD(__VA_ARGS__)"%.0d", GET_TAIL(__VA_ARGS__, 0))
 
 #endif // __DEBUG_PRINT_H__

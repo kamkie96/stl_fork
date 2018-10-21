@@ -20,11 +20,10 @@ typedef struct doublyLinkedList_t
 } doublyLinkedList_t;
 
 doublyLinkedList_t* init(size_t elementSize, int (*compare)(const void*, const void*));
-void insert(doublyLinkedList_t* dll_p, void* data_p);
-void erase(doublyLinkedList_t* dll_p, void* outputData_p, size_t index);
-void get(const doublyLinkedList_t* dll_p, void* outputData_p, size_t index);
-int search(const doublyLinkedList_t* dll_p, void* searchData_p);
-void clear(doublyLinkedList_t* dll_p);
+int insert(doublyLinkedList_t* dll_p, const void* data_p);
+int erase(doublyLinkedList_t* dll_p, const void* nodeToDelete_p);
+int search(const doublyLinkedList_t* dll_p, const void* searchData_p);
+int clear(doublyLinkedList_t* dll_p);
 size_t size(const doublyLinkedList_t* dll_p);
 
 #endif // __DOUBLY_LINKED_LIST_H__

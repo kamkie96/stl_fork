@@ -13,8 +13,6 @@ set (DOUBLY_LINKED_LIST_TESTS_SOURCE_FILES
 
 add_executable(${PROJECT_NAME} ${DOUBLY_LINKED_LIST_TESTS_SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ../inc)
-#target_include_directories(${PROJECT_NAME} PRIVATE ../../ctest/inc)
-
 target_link_libraries(${PROJECT_NAME} doubly_linked_list_lib)
+
 

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+/* need to be done better */
+#include "../../common/ctest/inc/ctest.h"
+
 #define SIZE_OF_ARRAY(array) sizeof(array) / sizeof(array[0])
 
 static int
@@ -82,6 +85,8 @@ printDouble(const doublyLinkedList_t* dll_p)
 static void
 testInitAndClearFuntions(void)
 {
+    printf("testInitAndClearFuntions\n");
+
     doublyLinkedList_t* dll_p = init(sizeof(int32_t), compareInt32);
     assert(dll_p);
     assert(dll_p->__head_p__ == NULL && dll_p->__tail_p__ == NULL);
@@ -97,6 +102,8 @@ testInitAndClearFuntions(void)
 static void
 testInsertFunction(void)
 {
+    printf("testInsertFunction\n");
+
     /* ************************************************** */
     /* test insert after tail */
     doublyLinkedList_t* dll_p = init(sizeof(int32_t), compareInt32);
@@ -170,6 +177,7 @@ testInsertFunction(void)
     }
 
     printDouble(dll_p);
+    printf("\n");
     clear(dll_p);
 
     /* ************************************************** */
@@ -178,100 +186,86 @@ testInsertFunction(void)
 static void
 testEraseFunction(void)
 {
+    printf("testEraseFunction\n");
+
+    /* ************************************************** */
+    /* delete node when head equals tail */
     doublyLinkedList_t* dll_p = init(sizeof(uint32_t), compareUint32);
 
-    uint32_t arrayOfUints[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 27, 31 };
+    uint32_t testData = 10;
 
-    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayOfUints); i++)
-    {
-        insert(dll_p, &arrayOfUints[i]);
-    }
+    insert(dll_p, &testData);
 
     printUint32(dll_p);
     printf("\n");
 
-    size_t sizeOfDll = size(dll_p);
-    uint32_t outputData = 0;
-
-    /* ************************************************** */
-    /* erase value from tail */
-    /* { 2, 3, 5, 7, 11, 13, 17, 19, 23, 27, ->31<- } */
-
-    erase(dll_p, &outputData, 10);
-    assert(outputData == arrayOfUints[10]);
-    assert(--sizeOfDll == size(dll_p));
+    assert(erase(dll_p, &testData) == 0);
 
     printUint32(dll_p);
     printf("\n");
-
-    /* ************************************************** */
-    /* erase value from head */
-    /* { ->2<-, 3, 5, 7, 11, 13, 17, 19, 23, 27, !31 } */
-
-    erase(dll_p, &outputData, 0);
-    assert(outputData == arrayOfUints[0]);
-    assert(--sizeOfDll == size(dll_p));
-
-    printUint32(dll_p);
-    printf("\n");
-
-    /* ************************************************** */
-    /* erase value from middle of list */
-    /* { !2, 3, 5, 7, 11, 13, 17, ->19<-, 23, 27, !31 } */
-
-    erase(dll_p, &outputData, 5);
-    assert(outputData == arrayOfUints[6]);
-    assert(--sizeOfDll == size(dll_p));
-
-    printUint32(dll_p);
-    printf("\n");
-
-    /* ************************************************** */
-    /* erase value from middle of list */
-    /* { !2, 3, 5, ->7<-, 11, 13, !17, 19, 23, 27, !31 } */
-
-    erase(dll_p, &outputData, 2);
-    assert(outputData == arrayOfUints[3]);
-    assert(--sizeOfDll == size(dll_p));
-
-    printUint32(dll_p);
-    printf("\n");
-
     clear(dll_p);
 
-    /* ************************************************** */
+    /* *************************************************** */
+    /* erase value from tail, when tail is not equals head */
 
-    dll_p = init(sizeof(double), compareDouble);
+    dll_p = init(sizeof(uint32_t), compareUint32);
 
-    double array[] = { 3.14, 6.28, 8.56,
-                       2.77, 2.09, 1.95,
-                       5.78, 5.38, 5.89,
-                       9.78, 9.98, 9.99,
-                       0.45, 0.23, 0.11,
-                       7.34, 5.85, 6.76 };
-
-    double expectedArray[] = { 0.11, 0.23, 0.45,
-                               1.95, 2.09, 2.77,
-                               3.14, 5.38, 5.78,
-                               5.85, 5.89, 6.28,
-                               6.76, 7.34, 8.56,
-                               9.78, 9.98, 9.99 };
+    uint32_t array[] = { 5, 10 };
 
     for (size_t i = 0; i < SIZE_OF_ARRAY(array); i++)
     {
         insert(dll_p, &array[i]);
     }
 
-    sizeOfDll = size(dll_p);
-    double outputData2 = 0;
+    printUint32(dll_p);
+    printf("\n");
 
-    for (size_t i = 0; i < SIZE_OF_ARRAY(array); i++)
+    assert(erase(dll_p, &array[1]) == 0);
+
+    printUint32(dll_p);
+    printf("\n");
+    clear(dll_p);
+
+    /* *************************************************** */
+    /* erase value from head, when head is not equals head */
+
+    dll_p = init(sizeof(uint32_t), compareUint32);
+
+    uint32_t arrayForHead[] = { 5, 10 };
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayForHead); i++)
     {
-        erase(dll_p, &outputData2, 0);
-        assert(outputData2 == expectedArray[i]);
-        assert(--sizeOfDll == size(dll_p));
+        insert(dll_p, &arrayForHead[i]);
     }
 
+    printUint32(dll_p);
+    printf("\n");
+
+    assert(erase(dll_p, &arrayForHead[0]) == 0);
+
+    printUint32(dll_p);
+    printf("\n");
+    clear(dll_p);
+
+    /* *************************************************** */
+    /* erase value between two nodes */
+
+    dll_p = init(sizeof(uint32_t), compareUint32);
+
+    uint32_t arrayForMiddleNode[] = { 5, 10, 15 };
+
+    for (size_t i = 0; i < SIZE_OF_ARRAY(arrayForMiddleNode); i++)
+    {
+        insert(dll_p, &arrayForMiddleNode[i]);
+    }
+
+    printUint32(dll_p);
+    printf("\n");
+
+    assert(erase(dll_p, &arrayForMiddleNode[1]) == 0);
+
+    printUint32(dll_p);
+    printf("\n");
     clear(dll_p);
 }
 
