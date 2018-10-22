@@ -58,6 +58,51 @@ static int success;
                success, failed); \
     } while (0)
 
+#define COMPARE_LENGTH_STRING(lhs, rhs, op) \
+    do { \
+        const char* _lhs = (const char*)lhs; \
+        const char* _rhs = (const char*)rhs; \
+        size_t _sizeOfLhs = strlen(_lhs); \
+        size_t _sizeOfRhs = strlen(_rhs); \
+        if (_sizeOfLhs op _sizeOfRhs) \
+        { \
+            ++success; \
+            PRINT_SUCCESS(__FILENAME__, __func__, __LINE__, "%s", _lhs, op, _rhs); \
+        } \
+        else \
+        { \
+            ++failed; \
+            PRINT_FAIL(__FILENAME__, __func__, __LINE__, "%s", _lhs, op, _rhs); \
+        } \
+    } while (0) \
+
+#define COMPARE_LEXICOGRAPHICALLY_STRING(lhs, rhs, op) \
+    do { \
+        const char* _lhs = (const char*)lhs; \
+        const char* _rhs = (const char*)rhs; \
+        if (strcmp(_lhs, _rhs) op 0) \
+        { \
+            ++success; \
+            PRINT_SUCCESS(__FILENAME__, __func__, __LINE__, "%s", _lhs, op, _rhs); \
+        } \
+        else \
+        { \
+            ++failed; \
+            PRINT_FAIL(__FILENAME__, __func__, __LINE__, "%s", _lhs, op, _rhs); \
+        } \
+    } while (0) \
+
+/* ******************************************************** */
+
+#define EQUALS_STRING(a, b) COMPARE_LEXICOGRAPHICALLY_STRING(a, b, ==)
+#define NOT_EQUALS_STRING(a, b) COMPARE_LEXICOGRAPHICALLY_STRING(a, b, !=)
+#define LONGER_STRING(a, b) COMPARE_LENGTH_STRING(a, b, >)
+#define SHORTER_STRING(a, b) COMPARE_LENGTH_STRING(a, b, <)
+
+#define ASSERT_PTR(a, b, op) TEST_ASSERT(a, b, void*, "%p", op)
+#define EQUALS_PTR(a, b) ASSERT_PTR(a, b, ==)
+#define NOT_EQUALS_PTR(a, b) ASSERT_PTR(a, b, !=)
+
 #define ASSERT_INT(a, b, op) TEST_ASSERT(a, b, int, "%d", op)
 #define EQUALS_INT(a, b) ASSERT_INT(a, b, ==)
 #define NOT_EQUALS_INT(a, b) ASSERT_INT(a, b, !=)
@@ -69,16 +114,6 @@ static int success;
 #define NOT_EQUALS_DOUBLE(a, b) ASSERT_DOUBLE(a, b, !=)
 #define BIGGER_DOUBLE(a, b) ASSERT_DOUBLE(a, b, >)
 #define SMALLER_DOUBLE(a, b) ASSERT_DOUBLE(a, b, <)
-
-/* need to be fix
- * to comapre two strings, should be use strcmp()
- * to measure length of two strings, should be use strlen()
- */
-#define ASSERT_STRING(a, b, op) TEST_ASSERT(a, b, const char*, "%s", op)
-#define EQUALS_STRING(a, b) ASSERT_STRING(a, b, ==)
-#define NOT_EQUALS_STRING(a, b) ASSERT_STRING(a, b, !=)
-#define BIGGER_STRING(a, b) ASSERT_STRING(a, b, >)
-#define SMALLER_STRING(a, b) ASSERT_STRING(a, b, <)
 
 #define ASSERT_SIZE_T(a, b, op) TEST_ASSERT(a, b, size_t, "%zu", op)
 #define EQUALS_SIZE_T(a, b) ASSERT_SIZE_T(a, b, ==)

@@ -2,6 +2,18 @@
 #include <ctest.h>
 
 static void
+testForInts(void)
+{
+    int biggerValue = 10000;
+    int smallerValue = 0;
+
+    EQUALS_INT(biggerValue, biggerValue);
+    NOT_EQUALS_INT(biggerValue, smallerValue);
+    BIGGER_INT(biggerValue, smallerValue);
+    SMALLER_INT(smallerValue, biggerValue);
+}
+
+static void
 testForDoubles(void)
 {
     double biggerValue = 999.999;
@@ -16,20 +28,36 @@ testForDoubles(void)
 static void
 testForStrings(void)
 {
-    const char* longerString= "Hello";
+    const char* longerString= "Hello world";
     const char* shorterString= "C11";
 
     EQUALS_STRING(longerString, longerString);
     NOT_EQUALS_STRING(longerString, shorterString);
-    BIGGER_STRING(longerString, shorterString);
-    SMALLER_STRING(shorterString, longerString);
+    LONGER_STRING(longerString, shorterString);
+    SHORTER_STRING(shorterString, longerString);
 }
 
-int main(void)
+static void
+testForPointers(void)
+{
+    char string[] = "Hello world!";
+    int value = 2;
+
+    void* ptr1 = &string[0];
+    void* ptr2 = &value;
+
+    EQUALS_PTR(ptr1, ptr1);
+    NOT_EQUALS_PTR(ptr1, ptr2);
+}
+
+int
+main(void)
 {
     BEGIN();
+    TEST(testForInts());
     TEST(testForDoubles());
     TEST(testForStrings());
+    TEST(testForPointers());
     SUMMARY();
 
     return 0;
