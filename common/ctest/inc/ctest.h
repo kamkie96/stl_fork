@@ -44,7 +44,7 @@ static int success;
         } \
     } while (0)
 
-#define _ASSERT(a, b, cmp, type, fmt) __ASSERT(a, b, cmp, type, fmt, ==)
+#define _ASSERT(a, b, cmp, type, fmt) __ASSERT(a, b, cmp, type, fmt, >=)
 
 #define ASSERT_INT(a, b) _ASSERT(a, b, __COMPARATOR, int, "%d")
 #define ASSERT_STR(a, b) _ASSERT(a, b, strcmp, const char*, "%s")

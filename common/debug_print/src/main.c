@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-//#define DEBUG_PRINT
+#define DEBUG_PRINT
 #include <debug_print.h>
 
 int main(void)
