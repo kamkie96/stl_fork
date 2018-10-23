@@ -2,9 +2,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
-
-/* need to be done better */
-#include "../../common/ctest/inc/ctest.h"
+#include <ctest.h>
+#include <debug_print.h>
 
 #define SIZE_OF_ARRAY(array) sizeof(array) / sizeof(array[0])
 
@@ -85,18 +84,18 @@ printDouble(const doublyLinkedList_t* dll_p)
 static void
 testInitAndClearFuntions(void)
 {
-    printf("testInitAndClearFuntions\n");
-
     doublyLinkedList_t* dll_p = init(sizeof(int32_t), compareInt32);
+    NOT_EQUALS_PTR(dll_p, NULL);
+//    NOT_EQUALS_PTR(dll_p->__head_p__)
     assert(dll_p);
     assert(dll_p->__head_p__ == NULL && dll_p->__tail_p__ == NULL);
     assert(dll_p->__compare__ == compareInt32);
 
     size_t size = 0;
 
-    assert(dll_p->__elementSize__ == sizeof(int));
-    assert(dll_p->__size__ == size);
-    clear(dll_p);
+    EQUALS_SIZE_T(dll_p->__size__, sizeof(int));
+    EQUALS_SIZE_T(dll_p->__size__, size);
+    EQUALS_INT(clear(dll_p), 0);
 }
 
 static void

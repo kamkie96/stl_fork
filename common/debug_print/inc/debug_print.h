@@ -3,6 +3,9 @@
 
 #include <stdarg.h>
 
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#ifdef DEBUG_PRINT
 static int myPrint(const char* fmt, ...)
 {
     va_list list;
@@ -11,6 +14,13 @@ static int myPrint(const char* fmt, ...)
     va_end(list);
     return r;
 }
+#else
+static int myPrint(const char* fmt, ...)
+{
+    (void)fmt;
+    return 0;
+}
+#endif
 
 #define _GET_HEAD(H, ...) H
 

@@ -21,7 +21,7 @@ add_library(${PROJECT_NAME}_lib
     ${DOUBLY_LINKED_LIST_SOURCE_FILES}
     )
 target_include_directories(${PROJECT_NAME}_lib PUBLIC inc)
-target_include_directories(${PROJECT_NAME}_lib PUBLIC ../common/)
+target_include_directories(${PROJECT_NAME}_lib PUBLIC ../common)
 
 add_executable(${PROJECT_NAME} src/main.c)
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
