@@ -1,45 +1,76 @@
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 
 static int failed;
 static int success;
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_DEFAULT "\x1b[0m"
+#define __ANSI_COLOR_RED     "\x1b[31m"
+#define __ANSI_COLOR_GREEN   "\x1b[32m"
+#define __ANSI_COLOR_DEFAULT "\x1b[0m"
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define _toString(x) #x
-#define toString(x) _toString(x)
+#define __toString(x) #x
+#define _toString(x) __toString(x)
 
-#define PRINT_FAIL(file, function, line, fmt, first_variable, operator, second_variable) \
+#define __PRINT_FAIL(file, function, line, fmt, first_variable, operator, second_variable) \
     do { \
-        printf(ANSI_COLOR_RED "[ FAILED  ]  %s:%s:%d (" fmt " %s " fmt ")\n" ANSI_COLOR_DEFAULT, \
-        file, function, line, first_variable, toString(operator), second_variable); \
+        printf(__ANSI_COLOR_RED "[ FAILED  ]  %s:%s:%d (" fmt " %s " fmt ")\n" __ANSI_COLOR_DEFAULT, \
+        file, function, line, first_variable, _toString(operator), second_variable); \
     } while (0)
 
-#define PRINT_SUCCESS(file, function, line, fmt, first_variable, operator, second_variable) \
+#define __PRINT_SUCCESS(file, function, line, fmt, first_variable, operator, second_variable) \
     do { \
-        printf(ANSI_COLOR_GREEN "[ SUCCESS ]  %s:%s:%d (" fmt " %s " fmt ")\n" ANSI_COLOR_DEFAULT, \
-        file, function, line, first_variable, toString(operator), second_variable); \
+        printf(__ANSI_COLOR_GREEN "[ SUCCESS ]  %s:%s:%d (" fmt " %s " fmt ")\n" __ANSI_COLOR_DEFAULT, \
+        file, function, line, first_variable, _toString(operator), second_variable); \
     } while (0)
 
-#define TEST_ASSERT(a, b, type, fmt, op) \
+#define __COMPARATOR(a, b) (a >= b ? 1 - (a == b) : -1)
+
+#define __ASSERT(a, b, cmp, type, fmt, op) \
     do { \
         type _a = (a); \
         type _b = (b); \
-        if (!(_a op _b)) \
+        if (cmp(a, b) op 0) \
         { \
-            ++failed; \
-            PRINT_FAIL(__FILENAME__, __func__, __LINE__, fmt, a, op, b); \
+            ++success; \
+            __PRINT_SUCCESS(__FILENAME__, __func__, __LINE__, fmt, _a, op, _b); \
         } \
         else \
         { \
-            ++success; \
-            PRINT_SUCCESS(__FILENAME__, __func__, __LINE__, fmt, a, op, b); \
+            ++failed; \
+            __PRINT_FAIL(__FILENAME__, __func__, __LINE__, fmt, _a, op, _b); \
         } \
     } while (0)
+
+#define _ASSERT(a, b, cmp, type, fmt) __ASSERT(a, b, cmp, type, fmt, >=)
+
+#define ASSERT_INT(a, b) _ASSERT(a, b, __COMPARATOR, int, "%d")
+#define ASSERT_STR(a, b) _ASSERT(a, b, strcmp, const char*, "%s")
+#define ASSERT_PTR(a, b) _ASSERT(a, b, __COMPARATOR, void*, "%p")
+#define ASSERT_SIZE_T(a, b) _ASSERT(a, b, __COMPARATOR, size_t, "%zu")
+
+#define __EXPECT(a, func, type, fmt, op) \
+    do { \
+        type _a = (a); \
+        if (_a op func) \
+        { \
+            ++success; \
+            __PRINT_SUCCESS(__FILENAME__, __func__, __LINE__, fmt, _a, op, func); \
+        } \
+        else \
+        { \
+            ++failed; \
+            __PRINT_FAIL(__FILENAME__, __func__, __LINE__, fmt, _a, op, func); \
+        } \
+    } while (0) \
+
+#define _EXPECT(a, func, type, fmt) __EXPECT(a, func, type, fmt, ==)
+
+#define EXPECT_INT(a, func) _EXPECT(a, func, int, "%d")
+#define EXPECT_SIZE_T(a, func) _EXPECT(a, func, size_t, "%zu")
+#define EXPECT_STR(a, func) _EXPECT(a, func, const char*, "%s")
 
 #define TEST(function) \
     do { \
@@ -53,35 +84,8 @@ static int success;
 
 #define SUMMARY() \
     do { \
-        printf(ANSI_COLOR_GREEN "Passed tests : %d\n" \
-               ANSI_COLOR_RED "Failed tests : %d\n" ANSI_COLOR_DEFAULT, \
+        printf(__ANSI_COLOR_GREEN "Passed tests : %d\n" \
+               __ANSI_COLOR_RED "Failed tests : %d\n" __ANSI_COLOR_DEFAULT, \
                success, failed); \
     } while (0)
 
-#define ASSERT_INT(a, b, op) TEST_ASSERT(a, b, int, "%d", op)
-#define EQUALS_INT(a, b) ASSERT_INT(a, b, ==)
-#define NOT_EQUALS_INT(a, b) ASSERT_INT(a, b, !=)
-#define BIGGER_INT(a, b) ASSERT_INT(a, b, >)
-#define SMALLER_INT(a, b) ASSERT_INT(a, b, <)
-
-#define ASSERT_DOUBLE(a, b, op) TEST_ASSERT(a, b, double, "%lf", op)
-#define EQUALS_DOUBLE(a, b) ASSERT_DOUBLE(a, b, ==)
-#define NOT_EQUALS_DOUBLE(a, b) ASSERT_DOUBLE(a, b, !=)
-#define BIGGER_DOUBLE(a, b) ASSERT_DOUBLE(a, b, >)
-#define SMALLER_DOUBLE(a, b) ASSERT_DOUBLE(a, b, <)
-
-/* need to be fix
- * to comapre two strings, should be use strcmp()
- * to measure length of two strings, should be use strlen()
- */
-#define ASSERT_STRING(a, b, op) TEST_ASSERT(a, b, const char*, "%s", op)
-#define EQUALS_STRING(a, b) ASSERT_STRING(a, b, ==)
-#define NOT_EQUALS_STRING(a, b) ASSERT_STRING(a, b, !=)
-#define BIGGER_STRING(a, b) ASSERT_STRING(a, b, >)
-#define SMALLER_STRING(a, b) ASSERT_STRING(a, b, <)
-
-#define ASSERT_SIZE_T(a, b, op) TEST_ASSERT(a, b, size_t, "%zu", op)
-#define EQUALS_SIZE_T(a, b) ASSERT_SIZE_T(a, b, ==)
-#define NOT_EQUALS_SIZE_T(a, b) ASSERT_SIZE_T(a, b, !=)
-#define BIGGER_SIZE_T(a, b) ASSERT_SIZE_T(a, b, >)
-#define SMALLER_SIZE_T(a, b) ASSERT_SIZE_T(a, b, <)

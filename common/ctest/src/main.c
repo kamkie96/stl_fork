@@ -2,34 +2,58 @@
 #include <ctest.h>
 
 static void
-testForDoubles(void)
+testForInts(void)
 {
-    double biggerValue = 999.999;
-    double smallerValue = 0.00001;
+    int biggerValue = 10000;
+    int smallerValue = 0;
 
-    EQUALS_DOUBLE(biggerValue, biggerValue);
-    NOT_EQUALS_DOUBLE(biggerValue, smallerValue);
-    BIGGER_DOUBLE(biggerValue, smallerValue);
-    SMALLER_DOUBLE(smallerValue, biggerValue);
+    ASSERT_INT(biggerValue, biggerValue);
+    ASSERT_INT(biggerValue, smallerValue);
+}
+
+static void
+testForSizet(void)
+{
+    size_t biggerValue = 10000;
+    size_t smallerValue = 0;
+
+    ASSERT_SIZE_T(biggerValue, biggerValue);
+    ASSERT_SIZE_T(biggerValue, smallerValue);
 }
 
 static void
 testForStrings(void)
 {
-    const char* longerString= "Hello";
+    const char* longerString= "Hello world";
     const char* shorterString= "C11";
 
-    EQUALS_STRING(longerString, longerString);
-    NOT_EQUALS_STRING(longerString, shorterString);
-    BIGGER_STRING(longerString, shorterString);
-    SMALLER_STRING(shorterString, longerString);
+    ASSERT_STR(longerString, longerString);
+    ASSERT_STR(longerString, shorterString);
+    EXPECT_SIZE_T(11, strlen(longerString));
+    EXPECT_SIZE_T(3, strlen(shorterString));
 }
 
-int main(void)
+static void
+testForPointers(void)
+{
+    int a = 5;
+    int b = 10;
+
+    void* ptr1 = &a;
+    void* ptr2 = &b;
+
+    ASSERT_PTR(ptr1, ptr1);
+    ASSERT_PTR(ptr1, ptr2);
+}
+
+int
+main(void)
 {
     BEGIN();
-    TEST(testForDoubles());
+    TEST(testForInts());
+    TEST(testForSizet());
     TEST(testForStrings());
+    TEST(testForPointers());
     SUMMARY();
 
     return 0;
