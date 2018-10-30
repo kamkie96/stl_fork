@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-stack_t *init(size_t elementSize, size_t capacity)
+#define FREE(ptr) \
+    do { \
+      free(ptr); \
+      ptr = NULL; \
+    } while (0)
+
+stack_t*
+init(const size_t elementSize, const size_t capacity)
 {
     if (elementSize == 0 || capacity == 0)
     {
@@ -20,7 +27,7 @@ stack_t *init(size_t elementSize, size_t capacity)
 
     if (!newStack_p->__stackArray_p__)
     {
-        free(newStack_p);
+        FREE(newStack_p);
         return NULL;
     }
 
@@ -30,7 +37,21 @@ stack_t *init(size_t elementSize, size_t capacity)
     return newStack_p;
 }
 
-int isFull(const stack_t* const stack_p)
+int
+clear(stack_t *stack_p)
+{
+    if (!stack_p)
+    {
+        return -1;
+    }
+
+    FREE(stack_p->__stackArray_p__);
+    FREE(stack_p);
+    return 0;
+}
+
+int
+isFull(const stack_t* const stack_p)
 {
     if (!stack_p)
     {
@@ -39,7 +60,8 @@ int isFull(const stack_t* const stack_p)
     return stack_p->__top__ == stack_p->__capacity__ - 1 ? 0 : -1;
 }
 
-int isEmpty(const stack_t* const stack_p)
+int
+isEmpty(const stack_t* const stack_p)
 {
     if (!stack_p)
     {
@@ -48,19 +70,65 @@ int isEmpty(const stack_t* const stack_p)
     return stack_p->__top__ == -1 ? 0 : -1;
 }
 
-int push(stack_t *stack_p, const void *dataToAdd_p)
+int
+getTop(const stack_t* const stack_p, void* outputData_p)
 {
-    if (!stack_p || !dataToAdd_p)
+    if (!stack_p)
     {
         return -1;
     }
 
-    /* what if stack is full ? */
+    if (isEmpty(stack_p))
+    {
+        return -1;
+    }
 
-    stack_p->__top__++;
-    void* destAddr_p = (char*)stack_p->__stackArray_p__ +
-                       (stack_p->__top__ * stack_p->__elementSize__);
-    (void)memcpy(destAddr_p, dataToAdd_p, stack_p->__elementSize__);
+    const void* sourceAddr_p = (char*)stack_p->__stackArray_p__ +
+                               ((size_t)stack_p->__top__ * stack_p->__elementSize__);
+    (void)memcpy(outputData_p, sourceAddr_p, stack_p->__elementSize__);
     return 0;
 }
 
+int
+push(stack_t* stack_p, const void* inputData_p)
+{
+    if (!stack_p && !inputData_p)
+    {
+        return -1;
+    }
+
+    if (isFull(stack_p) != 0)
+    {
+        return -1;
+    }
+
+    stack_p->__top__++;
+    void* destAddr_p = (char*)stack_p->__stackArray_p__ +
+                       ((size_t)stack_p->__top__ * stack_p->__elementSize__);
+    (void)memcpy(destAddr_p, inputData_p, stack_p->__elementSize__);
+    return 0;
+}
+
+int
+pop(stack_t *stack_p, void *outputData_p)
+{
+    if (!stack_p)
+    {
+        return -1;
+    }
+
+    if (isEmpty(stack_p) == 0)
+    {
+        return -1;
+    }
+
+    if (outputData_p)
+    {
+        const void* sourceAddr_p = (char*)stack_p->__stackArray_p__ +
+                                   ((size_t)stack_p->__top__ * stack_p->__elementSize__);
+        (void)memcpy(outputData_p, sourceAddr_p, stack_p->__elementSize__);
+    }
+
+    stack_p->__top__--;
+    return 0;
+}

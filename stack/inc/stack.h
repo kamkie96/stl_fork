@@ -11,12 +11,12 @@ typedef struct stack_t {
     size_t __elementSize__;
 } stack_t;
 
-stack_t* init(size_t elementSize, size_t capacity);
-int push(stack_t* stack_p, const void* dataToAdd_p);
+stack_t* init(const size_t elementSize, const size_t capacity);
+int push(stack_t* stack_p, const void* inputData_p);
+int pop(stack_t* stack_p, void* outputData_p);
+int clear(stack_t* stack_p);
+int getTop(const stack_t* const stack_p, void* outputData_p);
 int isFull(const stack_t* const stack_p);
 int isEmpty(const stack_t* const stack_p);
-/* enable to expand stack double times.
-   question is, how to write it well ? */
-int expandStack(stack_t* stack_p);
 
 #endif /* __STACK_H__ */
