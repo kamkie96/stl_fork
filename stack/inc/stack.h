@@ -2,11 +2,10 @@
 #define __STACK_H__
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef struct stack_t {
     void* __stackArray_p__;
-    int32_t __top__;
+    size_t __top__;
     size_t __capacity__;
     size_t __elementSize__;
 } stack_t;

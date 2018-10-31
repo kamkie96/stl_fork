@@ -33,7 +33,7 @@ init(const size_t elementSize, const size_t capacity)
 
     newStack_p->__elementSize__ = elementSize;
     newStack_p->__capacity__ = capacity;
-    newStack_p->__top__ = -1;
+    newStack_p->__top__ = 0;
     return newStack_p;
 }
 
@@ -57,7 +57,7 @@ isFull(const stack_t* const stack_p)
     {
         return -1;
     }
-    return stack_p->__top__ == stack_p->__capacity__ - 1 ? 0 : -1;
+    return stack_p->__top__ == stack_p->__capacity__ ? 0 : -1;
 }
 
 int
@@ -67,7 +67,7 @@ isEmpty(const stack_t* const stack_p)
     {
         return -1;
     }
-    return stack_p->__top__ == -1 ? 0 : -1;
+    return stack_p->__top__ == 0 ? 0 : -1;
 }
 
 int
@@ -78,13 +78,13 @@ getTop(const stack_t* const stack_p, void* outputData_p)
         return -1;
     }
 
-    if (isEmpty(stack_p))
+    if (isEmpty(stack_p) == 0)
     {
         return -1;
     }
 
     const void* sourceAddr_p = (char*)stack_p->__stackArray_p__ +
-                               ((size_t)stack_p->__top__ * stack_p->__elementSize__);
+                               ((stack_p->__top__ -1 ) * stack_p->__elementSize__);
     (void)memcpy(outputData_p, sourceAddr_p, stack_p->__elementSize__);
     return 0;
 }
@@ -97,15 +97,15 @@ push(stack_t* stack_p, const void* inputData_p)
         return -1;
     }
 
-    if (isFull(stack_p) != 0)
+    if (isFull(stack_p) == 0)
     {
         return -1;
     }
 
-    stack_p->__top__++;
     void* destAddr_p = (char*)stack_p->__stackArray_p__ +
-                       ((size_t)stack_p->__top__ * stack_p->__elementSize__);
+                       (stack_p->__top__ * stack_p->__elementSize__);
     (void)memcpy(destAddr_p, inputData_p, stack_p->__elementSize__);
+    stack_p->__top__++;
     return 0;
 }
 
@@ -122,6 +122,8 @@ pop(stack_t *stack_p, void *outputData_p)
         return -1;
     }
 
+    stack_p->__top__--;
+
     if (outputData_p)
     {
         const void* sourceAddr_p = (char*)stack_p->__stackArray_p__ +
@@ -129,6 +131,5 @@ pop(stack_t *stack_p, void *outputData_p)
         (void)memcpy(outputData_p, sourceAddr_p, stack_p->__elementSize__);
     }
 
-    stack_p->__top__--;
     return 0;
 }
