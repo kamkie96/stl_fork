@@ -14,7 +14,7 @@ set (DOUBLY_LINKED_LIST_TESTS_SOURCE_FILES
 add_executable(${PROJECT_NAME} ${DOUBLY_LINKED_LIST_TESTS_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} doubly_linked_list_lib)
-target_link_libraries(${PROJECT_NAME} ctest_lib)
-target_link_libraries(${PROJECT_NAME} debug_print_lib)
+#target_link_libraries(${PROJECT_NAME} ctest_lib)
+#target_link_libraries(${PROJECT_NAME} debug_print_lib)
 
 

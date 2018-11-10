@@ -187,14 +187,6 @@ delete_pos(vector_t* vector_p, const size_t index, void* outputData_p)
         return -1;
     }    
 
-    if (index == vector_p->__size__)
-    {
-        if (narrow(vector_p, 2) == -1)
-        {
-            return -1;
-        }
-    }    
-    
     const void* destAddr_p = (char*)vector_p->__vectorArray_p__ +
                              (index * vector_p->__elementSize__);
     void* srcAddr_p = (char*)vector_p->__vectorArray_p__ +
