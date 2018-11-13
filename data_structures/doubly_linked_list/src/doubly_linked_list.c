@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
 
 #define FREE(ptr) \
     do { \
@@ -10,16 +10,22 @@
       ptr = NULL; \
     } while (0)
 
+
 static nodeDoublyLinkedList_t*
-createNode(const doublyLinkedList_t* dll_p, const void* data_p)
+createNode(const doublyLinkedList_t* const dll_p, const void* const inputData_p)
 {
-    assert(dll_p && data_p);
-    nodeDoublyLinkedList_t* newNode_p = (nodeDoublyLinkedList_t*)malloc(sizeof(*newNode_p));
+    assert(dll_p && inputData_p);
+
+    nodeDoublyLinkedList_t* newNode_p = 
+            (nodeDoublyLinkedList_t*)malloc(sizeof(*newNode_p));
     assert(newNode_p);
+
     newNode_p->__data_p__ = malloc(dll_p->__elementSize__);
     assert(newNode_p->__data_p__);
+    
     newNode_p->__next_p__ = newNode_p->__prev_p__ = NULL;
-    (void)memcpy(newNode_p->__data_p__, data_p, dll_p->__elementSize__);
+    (void)memcpy(newNode_p->__data_p__, inputData_p, dll_p->__elementSize__);
+    
     return newNode_p;
 }
 
@@ -32,7 +38,7 @@ freeNode(nodeDoublyLinkedList_t* node_p)
 }
 
 doublyLinkedList_t*
-init(size_t element_size, int (*compare)(const void*, const void*))
+init(const size_t element_size, int (*compare)(const void*, const void*))
 {
     if ((element_size < 1) && !compare)
     {
@@ -41,10 +47,17 @@ init(size_t element_size, int (*compare)(const void*, const void*))
 
     doublyLinkedList_t* newDoublyLinkedList_p =
             (doublyLinkedList_t*)malloc(sizeof(*newDoublyLinkedList_p));
+
+    if (!newDoublyLinkedList_p)
+    {
+        return NULL;
+    }
+
     newDoublyLinkedList_p->__size__ = 0;
     newDoublyLinkedList_p->__elementSize__ = element_size;
     newDoublyLinkedList_p->__compare__ = compare;
     newDoublyLinkedList_p->__head_p__ = newDoublyLinkedList_p->__tail_p__ = NULL;
+
     return newDoublyLinkedList_p;
 }
 
@@ -71,14 +84,14 @@ clear(doublyLinkedList_t* dll_p)
 }
 
 int
-insert(doublyLinkedList_t* dll_p, const void* data_p)
+insert(doublyLinkedList_t* dll_p, const void* const inputData_p)
 {
-    if (!dll_p && !data_p)
+    if (!dll_p && !inputData_p)
     {
         return -1;
     }
 
-    nodeDoublyLinkedList_t* newNode_p = createNode(dll_p, data_p);
+    nodeDoublyLinkedList_t* newNode_p = createNode(dll_p, inputData_p);
     dll_p->__size__++;
 
     /* add first node */
@@ -128,9 +141,9 @@ insert(doublyLinkedList_t* dll_p, const void* data_p)
 }
 
 int
-erase(doublyLinkedList_t* dll_p, const void* valueToDelete_p)
+erase(doublyLinkedList_t* dll_p, const void* const dataToDelete_p)
 {
-    if (!dll_p && !valueToDelete_p)
+    if (!dll_p && !dataToDelete_p)
     {
         return -1;
     }
@@ -143,7 +156,7 @@ erase(doublyLinkedList_t* dll_p, const void* valueToDelete_p)
     dll_p->__size__--;
 
     /* delete tail */
-    if (dll_p->__compare__(valueToDelete_p, dll_p->__tail_p__->__data_p__) == 0)
+    if (dll_p->__compare__(dataToDelete_p, dll_p->__tail_p__->__data_p__) == 0)
     {
         /* situation when tail equals head */
         if (dll_p->__tail_p__ == dll_p->__head_p__)
@@ -162,7 +175,7 @@ erase(doublyLinkedList_t* dll_p, const void* valueToDelete_p)
     }
 
     /* delete head */
-    if (dll_p->__compare__(valueToDelete_p, dll_p->__head_p__->__data_p__) == 0)
+    if (dll_p->__compare__(dataToDelete_p, dll_p->__head_p__->__data_p__) == 0)
     {
        nodeDoublyLinkedList_t* tmpNodeToDelete_p = dll_p->__head_p__;
        dll_p->__head_p__ = dll_p->__head_p__->__next_p__;
@@ -176,7 +189,7 @@ erase(doublyLinkedList_t* dll_p, const void* valueToDelete_p)
 
     while (currentNode_p != dll_p->__tail_p__)
     {
-        if (dll_p->__compare__(valueToDelete_p, currentNode_p->__data_p__) == 0)
+        if (dll_p->__compare__(dataToDelete_p, currentNode_p->__data_p__) == 0)
         {
             nodeDoublyLinkedList_t* tmpNodeToDelete_p = currentNode_p;
             currentNode_p->__next_p__->__prev_p__ = currentNode_p->__prev_p__;
@@ -190,7 +203,7 @@ erase(doublyLinkedList_t* dll_p, const void* valueToDelete_p)
 }
 
 int
-search(const doublyLinkedList_t* dll_p, const void* searchData_p)
+search(const doublyLinkedList_t* const dll_p, const void* const searchData_p)
 {
     if (!dll_p && !searchData_p)
     {
