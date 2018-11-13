@@ -2,16 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #define FREE(ptr) \
     do { \
       free(ptr); \
       ptr = NULL; \
     } while (0)
 
+
 stack_t*
 init(const size_t elementSize, const size_t capacity)
 {
-    if (elementSize == 0 || capacity == 0)
+    if (elementSize == 0 || capacity <= 1)
     {
         return NULL;
     }
@@ -40,15 +42,17 @@ init(const size_t elementSize, const size_t capacity)
 int
 clear(stack_t *stack_p)
 {
-    if (!stack_p)
+    if (!stack_p && !stack_p->__stackArray_p__)
     {
         return -1;
     }
 
     FREE(stack_p->__stackArray_p__);
     FREE(stack_p);
+    
     return 0;
 }
+
 
 int
 isFull(const stack_t* const stack_p)
@@ -60,6 +64,7 @@ isFull(const stack_t* const stack_p)
     return stack_p->__top__ == stack_p->__capacity__ ? 0 : -1;
 }
 
+
 int
 isEmpty(const stack_t* const stack_p)
 {
@@ -70,10 +75,11 @@ isEmpty(const stack_t* const stack_p)
     return stack_p->__top__ == 0 ? 0 : -1;
 }
 
+
 int
 getTop(const stack_t* const stack_p, void* outputData_p)
 {
-    if (!stack_p)
+    if (!stack_p && !stack_p->__stackArray_p__)
     {
         return -1;
     }
@@ -84,15 +90,17 @@ getTop(const stack_t* const stack_p, void* outputData_p)
     }
 
     const void* sourceAddr_p = (char*)stack_p->__stackArray_p__ +
-                               ((stack_p->__top__ -1 ) * stack_p->__elementSize__);
+                               ((stack_p->__top__ - 1) * stack_p->__elementSize__);
     (void)memcpy(outputData_p, sourceAddr_p, stack_p->__elementSize__);
+    
     return 0;
 }
 
+
 int
-push(stack_t* stack_p, const void* inputData_p)
+push(stack_t* stack_p, const void* const inputData_p)
 {
-    if (!stack_p && !inputData_p)
+    if (!stack_p && !stack_p->__stackArray_p__ && !inputData_p)
     {
         return -1;
     }
@@ -106,13 +114,15 @@ push(stack_t* stack_p, const void* inputData_p)
                        (stack_p->__top__ * stack_p->__elementSize__);
     (void)memcpy(destAddr_p, inputData_p, stack_p->__elementSize__);
     stack_p->__top__++;
+
     return 0;
 }
+
 
 int
 pop(stack_t *stack_p, void *outputData_p)
 {
-    if (!stack_p)
+    if (!stack_p && !stack_p->__stackArray_p__)
     {
         return -1;
     }

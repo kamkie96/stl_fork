@@ -11,7 +11,7 @@ typedef struct stack_t {
 } stack_t;
 
 stack_t* init(const size_t elementSize, const size_t capacity);
-int push(stack_t* stack_p, const void* inputData_p);
+int push(stack_t* stack_p, const void* const inputData_p);
 int pop(stack_t* stack_p, void* outputData_p);
 int clear(stack_t* stack_p);
 int getTop(const stack_t* const stack_p, void* outputData_p);
